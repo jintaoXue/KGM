@@ -1,0 +1,71 @@
+{
+    "use_sp_data": "True",
+    "fineg": true,
+    "rel_dic": {
+        "contains": 0,
+        "constrains": 1
+    },
+    "full_mode": "complex",
+    "model_name": "simple_hgn",
+    "topk": 6,
+    "class_num": 28,
+    "learning_r": 0.0001,
+    "embed_path": "./pretrain_info/embed_mat.txt",
+    "embed_dim": 300,
+    "epoch_num": 3,
+    "data_split": [
+        0.8,
+        0.2
+    ],
+    "max_len": 45,
+    "tensor_max_len": 10,
+    "train_emebd": false,
+    "out_size": 300,
+    "neg_ratio": 2,
+    "batch_size": 256,
+    "loss_func": "margin_loss",
+    "dropout": 0.1,
+    "cuda": true,
+    "num_worker": 0,
+    "batch_norm": false,
+    "load_graph_data": false,
+    "save_graph_data": false,
+    "mlp_layer_dims": [
+        512,
+        512
+    ],
+    "lstm_hs": 512,
+    "lstm_layer": 2,
+    "direction": true,
+    "cnn_st": 1,
+    "cnn_inc": 1,
+    "cnn_filters": [
+        [
+            1,
+            8,
+            5
+        ],
+        [
+            1,
+            4,
+            25
+        ],
+        [
+            1,
+            2,
+            45
+        ]
+    ],
+    "bert_heads": 4,
+    "bert_pos_dim": 64,
+    "bert_inter_dim": 1024,
+    "bert_hidden_dim": 256,
+    "bert_layer_num": 4,
+    "bert_name": "albert",
+    "use_trans": false,
+    "use_gnn": false,
+    "gnn_conv_ch": 3,
+    "gnn_heads": 2,
+    "nhop": 1,
+    "gat_alpha": 0.1
+}
