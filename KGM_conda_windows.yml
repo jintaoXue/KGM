@@ -5,7 +5,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - pip=23.3.1
+  - pip
   - python=3.10.13
   - wandb
   - yaml
@@ -14,7 +14,7 @@ dependencies:
       - numpy
       - plotly
       - tensorboard
-      - pandas==2.1.1
+      - pandas
       - matplotlib
       - scipy
       - thop
