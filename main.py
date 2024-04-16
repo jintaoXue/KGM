@@ -116,6 +116,7 @@ if __name__ == '__main__':
     cfg : Config = get_default_kwargs_yaml(cfg_path, args.model_name)
     cfg.log_dir = result_save_path
     cfg.use_sp_data = args.use_sp_data
+    cfg.use_gnn = args.use_gnn
     if args.use_wandb:
         cfg.logger_cfgs.use_wandb = True
     if args.use_sp_data:
