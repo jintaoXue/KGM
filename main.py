@@ -100,6 +100,11 @@ if __name__ == '__main__':
             train_pth = 'data/train_data.txt'
             test_pth = 'data/test_data.txt'
 
+    all_task_labels, all_products, corpus, task2id, id2task = generate_entities(os.path.join(os.getcwd(), train_pth), args.rel_dic)
+    embed_matrix, word2id, id2word = load_pretrained_embedding(corpus, args.embed_path, ' ', args.embed_dim, add_words=['PAD','DUMMY_TASK'])
+    sp_dic = {'none':0, 'plane':1, 'room space':2, 'door interface':3, 'window interface':4, 'wall plane':5, 'mep interface':6, 'ceiling plane':7,
+              'floor plane':8}
+
     current_datetime = datetime.datetime.now()
     setproctitle.setproctitle("xjt_{}".format(args.model_name))
     formatted_datetime = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
@@ -110,21 +115,16 @@ if __name__ == '__main__':
     # save_yaml_config(save_path=result_save_path, config=config)
     cfg : Config = get_default_kwargs_yaml(cfg_path, args.model_name)
     cfg.log_dir = result_save_path
-    cfg.exp_name = args.model_name + '-' + formatted_datetime
-    if args.use_wandb:
-        cfg.logger_cfgs.use_wandb = True
-    logger : Logger = init_log(cfg)
-
-    all_task_labels, all_products, corpus, task2id, id2task = generate_entities(os.path.join(os.getcwd(), train_pth), args.rel_dic)
-    embed_matrix, word2id, id2word = load_pretrained_embedding(corpus, args.embed_path, ' ', args.embed_dim, add_words=['PAD','DUMMY_TASK'])
-    sp_dic = {'none':0, 'plane':1, 'room space':2, 'door interface':3, 'window interface':4, 'wall plane':5, 'mep interface':6, 'ceiling plane':7,
-              'floor plane':8}
     if args.use_sp_data:
         data_name = "_with_spatial"
         task2si = process_task_si(all_task_labels, task2sp, sp_dic)
     else:
         data_name = "_no_spatial"
         task2si = None
+    cfg.exp_name = args.model_name + data_name + '-' + formatted_datetime
+    if args.use_wandb:
+        cfg.logger_cfgs.use_wandb = True
+    logger : Logger = init_log(cfg)
     if args.debug:
         train_data, dev_data = generate_data(all_products[:2000], all_task_labels[:2000], word2id, task2id, args.max_len, data_split=args.data_split, id2word=id2word, sp_dic=sp_dic)
     else:

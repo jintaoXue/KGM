@@ -1,4 +1,4 @@
-use_sp_data : False : <class 'bool'>
+use_sp_data : True : <class 'str'>
 fineg : True : <class 'bool'>
 rel_dic : {'contains': 0, 'constrains': 1} : <class 'dict'>
 full_mode : complex : <class 'str'>
