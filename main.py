@@ -14,7 +14,8 @@ from models.HRGCN.RGCN import HeteroClassifier
 from models.simpleHGN.simple_HGN import SimpleHGN
 from utils.logger import Logger, init_log
 from configs.config import Config, load_yaml
-
+import setproctitle
+import datetime
 def parse_args():
     args = argparse.ArgumentParser()
     args.add_argument("-sp", "--use_sp_data", default=True, help="if use spatial info and GNN") # False
@@ -99,8 +100,9 @@ if __name__ == '__main__':
             test_pth = 'data/test_data.txt'
     
     ########### logger ########## ########### logger ########## ########### logger ##########
-    import datetime
+
     current_datetime = datetime.datetime.now()
+    setproctitle.setproctitle("xjt_{}".format(args.model_name))
     formatted_datetime = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
     # config = Config(**arg_dic)
     result_save_path = os.path.dirname(__file__) + "/graph_results"
