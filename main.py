@@ -151,7 +151,7 @@ if __name__ == '__main__':
     graph_data_save_path = os.path.dirname(__file__) + '/graph_dataset'
     if args.load_graph_data:
         #warning data_save_path name cannot be _save_path or save_path
-        graph_train_datasets : DGLDst2 = DGLDst2(data_save_path=graph_data_save_path, name='train' + data_name, f_save_data = False, f_load_from_dir = True)
+        graph_train_datasets : DGLDst2 = DGLDst2(data_save_path=graph_data_save_path, name='train' + data_name, f_save_data = False, f_load_from_dir = args.use_gnn)
     else:
         if args.use_sp_data:
             sp_rel_prod_triples = get_sp_rel_raw_product_embs(batch_products=train_dataset.data, embed_matrix=embed_matrix, word2id=word2id, id2word=id2word, args=args)
