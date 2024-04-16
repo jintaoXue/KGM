@@ -17,10 +17,10 @@ from configs.config import Config, load_yaml
 
 def parse_args():
     args = argparse.ArgumentParser()
-    args.add_argument("-sp", "--use_sp_data", default=False, help="if use spatial info and GNN") # False
+    args.add_argument("-sp", "--use_sp_data", default=True, help="if use spatial info and GNN") # False
     args.add_argument("-fig", "--fineg", default=True, help="if use fine granularity")
     args.add_argument("-rid", "--rel_dic", default={'contains':0, 'constrains':1}, help='relation2id')
-    args.add_argument("-md", "--full_mode", default="simple", help="use simple or complex aggregator") # simple OR complex
+    args.add_argument("-md", "--full_mode", default="complex", help="use simple or complex aggregator") # simple OR complex
     args.add_argument("-mn", "--model_name", default="mean", help="model for aggregation") # mean sum pool
     args.add_argument("-tk", "--topk", default=6, help="the top class for computing hit@")
     args.add_argument("-cn", "--class_num", default=28, help="the number of task types")
@@ -43,6 +43,7 @@ def parse_args():
     args.add_argument("-bn", "--batch_norm", default=False)
     args.add_argument("-lgd", "--load_graph_data", default=False)
     args.add_argument("-sgd", "--save_graph_data", default=False)
+    args.add_argument("-wandb", "--use_wandb", default=False)
     # MLP parameters
     args.add_argument("-ld", "--mlp_layer_dims", default=[512, 512], help="the dims of different layers for the MLP model")
     # LSTM parameters
@@ -109,7 +110,8 @@ if __name__ == '__main__':
     cfg : Config = get_default_kwargs_yaml(cfg_path, args.model_name)
     cfg.log_dir = result_save_path
     cfg.exp_name = args.model_name + '-' + formatted_datetime
-    cfg.logger_cfgs.use_wandb = True
+    if args.use_wandb:
+        cfg.logger_cfgs.use_wandb = True
     logger : Logger = init_log(cfg)
 
     ########### logger ########## ########### logger ########## ########### logger ##########

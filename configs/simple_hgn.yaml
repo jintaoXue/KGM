@@ -60,7 +60,7 @@ defaults:
   topk: 6
   train_emebd: false
   use_gnn: false
-  use_sp_data: 'True'
+  use_sp_data: true
   use_trans: false
   # logger configurations
   logger_cfgs:

@@ -524,19 +524,19 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
             roc_data = [[x, y] for (x, y) in zip(fprs, tprs)]
             auc_data = [[x,roc_aucs] for x in np.arange(0,1,0.1)]
             pr_data = [[x, y] for (x, y) in zip(recalls, precs)]
-            roc_table = wandb.Table(data=roc_data, columns=["x", "y"])
+            roc_table = wandb.Table(data=roc_data, columns=["FPR", "TPR"])
             auc_table = wandb.Table(data=auc_data, columns=["x", "y"])
-            pr_table = wandb.Table(data=pr_data, columns=["x", "y"])
+            pr_table = wandb.Table(data=pr_data, columns=["Recall", "Precision"])
             wandb.log(
                 {
                     "ROC_Curve": wandb.plot.line(
-                        roc_table, "x", "y", title= "ROC_Curves"
+                        roc_table, "FPR", "TPR", title= "ROC_Curves"
                     ),
                     "AUC": wandb.plot.line(
                         auc_table, "x", "y", title= "AUC_Values"
                     ),
                     "PR_Curve": wandb.plot.line(
-                        pr_table, "x", "y", title= "PR_Curves"
+                        pr_table, "Recall", "Precision", title= "PR_Curves"
                     )
                 }
             )
