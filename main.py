@@ -18,7 +18,7 @@ import setproctitle
 import datetime
 def parse_args():
     args = argparse.ArgumentParser()
-    args.add_argument("-sp", "--use_sp_data", default=True, help="if use spatial info and GNN") # False
+    args.add_argument("-sp", "--use_sp_data", default=False, help="if use spatial info and GNN") # False
     args.add_argument("-fig", "--fineg", default=True, help="if use fine granularity")
     args.add_argument("-rid", "--rel_dic", default={'contains':0, 'constrains':1}, help='relation2id')
     args.add_argument("-md", "--full_mode", default="complex", help="use simple or complex aggregator") # simple OR complex
@@ -99,8 +99,6 @@ if __name__ == '__main__':
         else:
             train_pth = 'data/train_data.txt'
             test_pth = 'data/test_data.txt'
-    
-    ########### logger ########## ########### logger ########## ########### logger ##########
 
     current_datetime = datetime.datetime.now()
     setproctitle.setproctitle("xjt_{}".format(args.model_name))
@@ -117,24 +115,22 @@ if __name__ == '__main__':
         cfg.logger_cfgs.use_wandb = True
     logger : Logger = init_log(cfg)
 
-    ########### logger ########## ########### logger ########## ########### logger ##########
-
     all_task_labels, all_products, corpus, task2id, id2task = generate_entities(os.path.join(os.getcwd(), train_pth), args.rel_dic)
     embed_matrix, word2id, id2word = load_pretrained_embedding(corpus, args.embed_path, ' ', args.embed_dim, add_words=['PAD','DUMMY_TASK'])
     sp_dic = {'none':0, 'plane':1, 'room space':2, 'door interface':3, 'window interface':4, 'wall plane':5, 'mep interface':6, 'ceiling plane':7,
               'floor plane':8}
-
-    # all_term2id, id2all_term = generate_gnn_terms(all_products, word2id, args.rel_dic)
     if args.use_sp_data:
+        data_name = "_with_spatial"
         task2si = process_task_si(all_task_labels, task2sp, sp_dic)
     else:
+        data_name = "_no_spatial"
         task2si = None
-    
-    train_data, dev_data = generate_data(all_products, all_task_labels, word2id, task2id, args.max_len, data_split=args.data_split, id2word=id2word, sp_dic=sp_dic)
     if args.debug:
-        args.batch_size = 32
-        train_data, dev_data = generate_data(all_products[:500], all_task_labels[:500], word2id, task2id, args.max_len, data_split=args.data_split, id2word=id2word, sp_dic=sp_dic)
-    write_dev_data(dev_data, id2task, id2word, os.path.join(os.getcwd(), 'data/dev_spatial_data.txt'))
+        train_data, dev_data = generate_data(all_products[:2000], all_task_labels[:2000], word2id, task2id, args.max_len, data_split=args.data_split, id2word=id2word, sp_dic=sp_dic)
+    else:
+        train_data, dev_data = generate_data(all_products, all_task_labels, word2id, task2id, args.max_len, data_split=args.data_split, id2word=id2word, sp_dic=sp_dic)
+
+    # write_dev_data(dev_data, id2task, id2word, os.path.join(os.getcwd(), 'data/dev_spatial_data.txt'))
     train_dataset = Dst(train_data, word2id, args.tensor_max_len)
     # e.g., train_data: ([tensor(w_id_0, w_id_2), ... tensor(w_id_14, w_id_2)] , task_id)
     print('trainng data volume:', len(train_data))
@@ -146,6 +142,7 @@ if __name__ == '__main__':
     test_dataset_noisy = Dst(test_data_noisy, word2id, args.tensor_max_len)
     test_dataset_total = Dst(test_data_total, word2id, args.tensor_max_len)
     print('testing data noise added {}, and testing data total volume {}'.format(len(test_data_noisy), len(test_data_total)))
+
     # generate task label ids [63, 48, 77...] & process spatial information
     task_ids = torch.stack([process_task_ids(args, tid, word2id, id2task) for tid in list(id2task.keys())]).unsqueeze(1)
     tasks_embeds = generate_batch_data(task_ids, embed_matrix, id2word, word2id, args).squeeze(1) # generate task embedding matrix, row maps to task id
@@ -154,11 +151,14 @@ if __name__ == '__main__':
     graph_data_save_path = os.path.dirname(__file__) + '/graph_dataset'
     if args.load_graph_data:
         #warning data_save_path name cannot be _save_path or save_path
-        graph_train_datasets : DGLDst2 = DGLDst2(data_save_path=graph_data_save_path, name='train_sp_detail', f_save_data = False, f_load_from_dir = True)
+        graph_train_datasets : DGLDst2 = DGLDst2(data_save_path=graph_data_save_path, name='train' + data_name, f_save_data = False, f_load_from_dir = True)
     else:
-        sp_rel_prod_triples = get_sp_rel_raw_product_embs(batch_products=train_dataset.data, embed_matrix=embed_matrix, word2id=word2id, id2word=id2word, args=args)
+        if args.use_sp_data:
+            sp_rel_prod_triples = get_sp_rel_raw_product_embs(batch_products=train_dataset.data, embed_matrix=embed_matrix, word2id=word2id, id2word=id2word, args=args)
+        else :
+            sp_rel_prod_triples = None
         graph_train_datasets : DGLDst2 = get_graph_dataset(args, train_dataset, embed_matrix, id2word, word2id, sp_rel_prod_triples, 
-                                                        id2task=id2task, save_path=graph_data_save_path, name = 'train_sp_detail', f_save_data = args.save_graph_data, f_load_from_dir = False)
+                                                        id2task=id2task, save_path=graph_data_save_path, name = 'train' + data_name, f_save_data = args.save_graph_data, f_load_from_dir = False)
     # sp_rel_prod_triples = get_sp_rel_raw_product_embs(batch_products=train_dataset.data, embed_matrix=embed_matrix, word2id=word2id, id2word=id2word, args=args)
     # graph_train_datasets2 : DGLDst2 = get_graph_dataset(args, train_dataset, embed_matrix, id2word, word2id, sp_rel_prod_triples, 
     #                                                     id2task=id2task, save_path=save_path, name = 'train_sp_detail', f_save_data = args.save_graph_data, f_load_from_dir = False)
@@ -172,6 +172,7 @@ if __name__ == '__main__':
             num_layers=4, heads= [4, 4, 4, 1], feat_drop=0.1, negative_slope=0.1,
             residual=False, beta=0.05, ntypes=graph_train_datasets.ntypes)
     gnn_model = None
+
     '''step 3: train models''' 
     if args.full_mode == 'complex':
         train_loader = DataLoader.DataLoader(graph_train_datasets, batch_size=args.batch_size, collate_fn=collate, drop_last=False, shuffle=True)
@@ -215,11 +216,14 @@ if __name__ == '__main__':
     optimizer = None
     #spatial and graph data
     if args.load_graph_data:
-        graph_test_datasets : DGLDst2 = DGLDst2(data_save_path=graph_data_save_path, name='test_sp_detail',f_save_data = False, f_load_from_dir = True)
+        graph_test_datasets : DGLDst2 = DGLDst2(data_save_path=graph_data_save_path, name= 'test' + data_name, f_save_data = False, f_load_from_dir = True)
     else:
-        sp_rel_prod_triples = get_sp_rel_raw_product_embs(batch_products=train_dataset.data, embed_matrix=embed_matrix, word2id=word2id, id2word=id2word, args=args)
+        if args.use_sp_data:
+            sp_rel_prod_triples = get_sp_rel_raw_product_embs(batch_products=train_dataset.data, embed_matrix=embed_matrix, word2id=word2id, id2word=id2word, args=args)
+        else:
+            sp_rel_prod_triples = None
         graph_test_datasets : DGLDst2 = get_graph_dataset(args, train_dataset, embed_matrix, id2word, word2id, sp_rel_prod_triples, 
-                                                        id2task=id2task, save_path=graph_data_save_path, name = 'test_sp_detail', f_save_data = args.save_graph_data, f_load_from_dir = False)
+                                                        id2task=id2task, save_path=graph_data_save_path, name = 'test' + data_name, f_save_data = args.save_graph_data, f_load_from_dir = False)
         
     test_loader_practical = DataLoader.DataLoader(graph_test_datasets, batch_size=args.batch_size, collate_fn=collate, drop_last=False, shuffle=True)
     _, res, test_df, _ = train_eval.train_evaluate2(args, logger, model, optimizer, test_loader_practical, embed_matrix, id2word, word2id, tasks_embeds, 

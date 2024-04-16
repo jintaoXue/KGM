@@ -265,7 +265,7 @@ def get_sp_rel_raw_product_embs(batch_products, embed_matrix, word2id, id2word, 
         batch_raw_products_emb.append(raw_products_emb)
     return batch_spatials_emb, batch_relations_emb, batch_raw_products_emb
 
-def get_graph_dataset(args, dataset, embed_matrix, id2word, word2id, sp_rel_prod_triples, id2task=None, save_path=None, name='KG', f_save_data = False, f_load_from_dir = False):
+def get_graph_dataset(args, dataset, embed_matrix, id2word, word2id, sp_rel_prod_triples=None, id2task=None, save_path=None, name='KG', f_save_data = False, f_load_from_dir = False):
     graphs = []
     labels = []
     labels_emb = []
@@ -277,42 +277,41 @@ def get_graph_dataset(args, dataset, embed_matrix, id2word, word2id, sp_rel_prod
         data = generate_batch_data(products, embed_matrix, id2word, word2id, args).to('cpu') # convert batch data (indices) to numerical matrix         
         label_ids = torch.stack([process_task_ids(args, bl, word2id, id2task) for bl in label]).unsqueeze(1)
         label_emb = Variable(generate_batch_data(label_ids, embed_matrix, id2word, word2id, args)).squeeze(1).to('cpu')
-
         data, label, label_emb = data.squeeze(0), label.squeeze(0), label_emb.squeeze(0)
         data_len = len(data)  
-        # data_len = self.per_data_len
+
         node_task = np.zeros(data_len)
         node_prod = np.arange(0, data_len)
-        node_sp = np.arange(0, data_len)
-        graph : dgl.heterograph.DGLGraph = dgl.heterograph({
-            #sp: spatial terms (like sp-room space), spatial relation (like contains), product terms (like 2D panel)
-            ('prod', 'in', 'task'): (node_prod, node_task),
-            ('sp', 'rel', 'prod'): (node_sp, node_prod),
-            ('sp', 'self', 'sp'): (node_sp, node_sp),
-            ('prod', 'self', 'prod'): (node_prod, node_prod),
-        })
-        graph.nodes['task'].data['feat'] = torch.ones(1, 300)
-        # graph.nodes['task'].data['feat'] = torch.ones(1, 300).to(torch.device("cuda:0"))
-        # all_products_seg_id = torch.tensor(all_products_seg_id)
-        # if self.args.cuda:
-        #     all_products_seg_id = all_products_seg_id.cuda()
+        if args.use_sp_data:
+            node_sp = np.arange(0, data_len)
+            graph : dgl.heterograph.DGLGraph = dgl.heterograph({
+                #sp: spatial terms (like sp-room space), spatial relation (like contains), product terms (like 2D panel)
+                ('prod', 'in', 'task'): (node_prod, node_task),
+                ('sp', 'rel', 'prod'): (node_sp, node_prod),
+                ('sp', 'self', 'sp'): (node_sp, node_sp),
+                ('prod', 'self', 'prod'): (node_prod, node_prod),
+            })
+            graph.edges['rel'].data['feat'] = sp_rel_prod_triples[1][index]
+            graph.nodes['sp'].data['feat'] = sp_rel_prod_triples[0][index]
+            graph.edges[('sp', 'self', 'sp')].data['feat'] = torch.ones(data_len, 1)
+        else:
+            graph : dgl.heterograph.DGLGraph = dgl.heterograph({
+                #sp: spatial terms (like sp-room space), spatial relation (like contains), product terms (like 2D panel)
+                ('prod', 'in', 'task'): (node_prod, node_task),
+                ('prod', 'self', 'prod'): (node_prod, node_prod),
+            })
         graph.nodes['prod'].data['feat'] = data
-        if (sp_rel_prod_triples[0][index]).shape != torch.Size([45, 300]):
-            a= 1
-        graph.nodes['sp'].data['feat'] = sp_rel_prod_triples[0][index]
-        graph.edges['in'].data['feat'] = torch.ones(data_len, 1)
         graph.edges[('prod', 'self', 'prod')].data['feat'] = torch.ones(data_len, 1)
-        graph.edges[('sp', 'self', 'sp')].data['feat'] = torch.ones(data_len, 1)
-        if (sp_rel_prod_triples[1][index]).shape != torch.Size([45, 300]):
-            a= 1
-        graph.edges['rel'].data['feat'] = sp_rel_prod_triples[1][index]
+        graph.nodes['task'].data['feat'] = torch.ones(1, 300)
+        graph.edges['in'].data['feat'] = torch.ones(data_len, 1)
+        # if (sp_rel_prod_triples[0][index]).shape != torch.Size([45, 300]):
+        #     a= 1
+        # if (sp_rel_prod_triples[1][index]).shape != torch.Size([45, 300]):
+        #     a= 1
         graphs.append(graph)
         labels_emb.append(label_emb)
         labels.append(label)
         masks.append(mask)
-        ## tasks_embeds[label].to('cpu') == label_emb
-        # if (tasks_embeds[label].to('cpu') - label_emb).any():
-        #     a = 1
     return DGLDst2(graphs=graphs, labels=labels, labels_emb=labels_emb, masks=masks, data_save_path=save_path, name=name, f_save_data = f_save_data, f_load_from_dir = f_load_from_dir)
 
 
