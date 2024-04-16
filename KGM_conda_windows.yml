@@ -6,7 +6,6 @@ channels:
   - defaults
 dependencies:
   - pip
-  - python=3.10
   - wandb
   - yaml
   - pip:
