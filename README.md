@@ -12,7 +12,7 @@ conda create --name KGM python=3.10.13
 then ref https://www.dgl.ai/pages/start.html to install dgl like:
     pip install  dgl -f https://data.dgl.ai/wheels/cu118/repo.html 
     conda install -c dglteam/label/cu118 dgl
-conda env update -n KGM --file KGM_conda_windows.yaml
+conda env update -n KGM --file KGM_conda_windows.yml
 
 
 conda create env -f KGM_conda_windows.yml
