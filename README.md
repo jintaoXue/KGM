@@ -17,4 +17,5 @@ install torch: https://download.pytorch.org/whl/torch_stable.html
 
 then ref https://www.dgl.ai/pages/start.html to install dgl like:
     pip install  dgl -f https://data.dgl.ai/wheels/cu118/repo.html 
+    conda install -c dglteam/label/cu118 dgl
 

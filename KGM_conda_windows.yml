@@ -9,13 +9,14 @@ dependencies:
   - python=3.10.13
   - wandb
   - yaml
+  - dgl
   - pip:
-      - numpy==1.23.5
-      - plotly==5.20.0
-      - tensorboard==2.15.1
+      - numpy
+      - plotly
+      - tensorboard
       - pandas==2.1.1
-      - matplotlib==3.8.0
-      - scipy==1.11.4
+      - matplotlib
+      - scipy
       - thop
       - scikit-learn
       - pydantic
