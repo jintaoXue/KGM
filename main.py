@@ -45,6 +45,7 @@ def parse_args():
     args.add_argument("-lgd", "--load_graph_data", default=False)
     args.add_argument("-sgd", "--save_graph_data", default=False)
     args.add_argument("-wandb", "--use_wandb", default=False)
+    args.add_argument("-debug", "--debug", default=False)
     # MLP parameters
     args.add_argument("-ld", "--mlp_layer_dims", default=[512, 512], help="the dims of different layers for the MLP model")
     # LSTM parameters
@@ -130,7 +131,9 @@ if __name__ == '__main__':
         task2si = None
     
     train_data, dev_data = generate_data(all_products, all_task_labels, word2id, task2id, args.max_len, data_split=args.data_split, id2word=id2word, sp_dic=sp_dic)
-    # train_data, dev_data = generate_data(all_products[:2000], all_task_labels[:2000], word2id, task2id, args.max_len, data_split=args.data_split, id2word=id2word, sp_dic=sp_dic)
+    if args.debug:
+        args.batch_size = 32
+        train_data, dev_data = generate_data(all_products[:500], all_task_labels[:500], word2id, task2id, args.max_len, data_split=args.data_split, id2word=id2word, sp_dic=sp_dic)
     write_dev_data(dev_data, id2task, id2word, os.path.join(os.getcwd(), 'data/dev_spatial_data.txt'))
     train_dataset = Dst(train_data, word2id, args.tensor_max_len)
     # e.g., train_data: ([tensor(w_id_0, w_id_2), ... tensor(w_id_14, w_id_2)] , task_id)

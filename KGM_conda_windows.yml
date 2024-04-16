@@ -16,7 +16,7 @@ dependencies:
       - tensorboard
       - pandas
       - matplotlib
-      - scipy
+      - scipy==1.11.4
       - thop
       - scikit-learn
       - pydantic

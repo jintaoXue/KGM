@@ -1,4 +1,4 @@
-use_sp_data : True : <class 'str'>
+use_sp_data : True : <class 'bool'>
 fineg : True : <class 'bool'>
 rel_dic : {'contains': 0, 'constrains': 1} : <class 'dict'>
 full_mode : complex : <class 'str'>
@@ -23,7 +23,8 @@ num_worker : 0 : <class 'int'>
 batch_norm : False : <class 'bool'>
 load_graph_data : False : <class 'bool'>
 save_graph_data : False : <class 'bool'>
-use_wandb : True : <class 'str'>
+use_wandb : False : <class 'bool'>
+debug : True : <class 'str'>
 mlp_layer_dims : [512, 512] : <class 'list'>
 lstm_hs : 512 : <class 'int'>
 lstm_layer : 2 : <class 'int'>
