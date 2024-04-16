@@ -24,4 +24,5 @@ dependencies:
       - IPython 
       - xlrd
       - rich
+      - wheel
 prefix: /home/xue/Repos/miniconda3/envs/taskGener
