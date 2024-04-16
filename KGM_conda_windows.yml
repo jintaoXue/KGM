@@ -9,7 +9,6 @@ dependencies:
   - python=3.10
   - wandb
   - yaml
-  - dgl
   - pip:
       - numpy
       - plotly
