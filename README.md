@@ -8,7 +8,7 @@ conda create env -f KGM_conda_env_simple.yml
 then ref https://www.dgl.ai/pages/start.html to install dgl 
 
 # Windows
-conda create --name KGM python=3.10.13
+conda create --name KGM python=3.10
 then ref https://www.dgl.ai/pages/start.html to install dgl like:
     conda install -c dglteam/label/cu118 dgl
 conda env update -n KGM --file KGM_conda_windows.yml
