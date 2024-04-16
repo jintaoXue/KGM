@@ -5,11 +5,9 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - cuda-toolkit=11.8.1
-  - cuda-tools=11.8.1
   - pip=23.3.1
   - python=3.10.13
-  - pytorch=2.0.1=py3.10_cuda11.8_cudnn8.5.0_0
+  - pytorch=2.0.1=py310_cu118
   - torchvision=0.15.2=py310_cu118
   - wandb
   - yaml
