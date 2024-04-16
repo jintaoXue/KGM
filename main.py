@@ -10,7 +10,7 @@ import train_eval
 import json
 import pandas as pd
 from drawing import *
-from models.HRGCN.RGCN import HeteroClassifier
+from models.HRGCN.RGCN import HeteroClassifier, HeteroRGCN
 from models.simpleHGN.simple_HGN import SimpleHGN
 from utils.logger import Logger, init_log
 from configs.config import Config, load_yaml
@@ -115,6 +115,9 @@ if __name__ == '__main__':
     # save_yaml_config(save_path=result_save_path, config=config)
     cfg : Config = get_default_kwargs_yaml(cfg_path, args.model_name)
     cfg.log_dir = result_save_path
+    cfg.use_sp_data = args.use_sp_data
+    if args.use_wandb:
+        cfg.logger_cfgs.use_wandb = True
     if args.use_sp_data:
         data_name = "_with_spatial"
         task2si = process_task_si(all_task_labels, task2sp, sp_dic)
@@ -122,8 +125,7 @@ if __name__ == '__main__':
         data_name = "_no_spatial"
         task2si = None
     cfg.exp_name = args.model_name + data_name + '-' + formatted_datetime
-    if args.use_wandb:
-        cfg.logger_cfgs.use_wandb = True
+
     logger : Logger = init_log(cfg)
     if args.debug:
         train_data, dev_data = generate_data(all_products[:2000], all_task_labels[:2000], word2id, task2id, args.max_len, data_split=args.data_split, id2word=id2word, sp_dic=sp_dic)
@@ -165,12 +167,14 @@ if __name__ == '__main__':
     '''step 2: create models'''
     # model, gnn_model = train_eval.select_model(args=args, corpus=corpus, all_products=all_products, word2id=word2id, id2word=id2word, 
     #                                            ent_embeds=embed_matrix, cluster_or_granu=False, all_term2id=None)
-    if args.model_name == 'gnn_lstm':
+    if args.model_name == 'gcn_lstm':
         model = HeteroClassifier(in_dim=args.embed_dim, hidden_dim=512, n_classes=args.embed_dim, rel_names=graph_train_datasets.etypes, args=args, f_use_gnn = True)
     elif args.model_name == 'simple_hgn':
         model = SimpleHGN(edge_dim=args.embed_dim, num_etypes=len(graph_train_datasets.etypes), in_dim=args.embed_dim, hidden_dim=512, num_classes=args.embed_dim,
             num_layers=4, heads= [4, 4, 4, 1], feat_drop=0.1, negative_slope=0.1,
-            residual=False, beta=0.05, ntypes=graph_train_datasets.ntypes)
+            residual=False, beta=0.05, ntypes=graph_train_datasets.ntypes)    
+    elif args.model_name == 'gcn':
+        model = HeteroRGCN(in_dim=args.embed_dim, hidden_dim=512, n_classes=args.embed_dim, rel_names=graph_train_datasets.etypes, args=args, f_use_gnn = args.use_sp_data)
     gnn_model = None
 
     '''step 3: train models''' 

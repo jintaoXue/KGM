@@ -42,9 +42,6 @@ class HeteroGraphConv(dglnn.HeteroGraphConv):
         self.lstm = nn.LSTM(in_dim, out_dim, batch_first=True, bidirectional = True
 )
 
-
-
-
 class RGCN(nn.Module):
     def __init__(self, in_feats, hid_feats, out_feats, rel_names):
         super().__init__()
@@ -97,10 +94,6 @@ class LSTMAggregator(nn.Module):
             essen_data = self.fc_in(essen_data) # ensure dimension consistancy bs * max_len * input_size/2
             bs = essen_data.shape[0]
             data = torch.cat((essen_data, add_data), dim=-1)
-            #if not task_sp_embeds==None:
-            #    task_res = torch.cat((tasks_embeds, task_sp_embeds), dim=-1)   
-            #dummy_data = data[-1].repeat((1,1,2))
-            #data_ = torch.cat((dummy_data, data), dim=1)
         else:
             bs = data.shape[0]  
         data = data.view(self.max_len, bs, -1) # out: the output embedding at the last LSTM layer, each corresponds to a input word           
@@ -133,23 +126,40 @@ class HeteroClassifier(nn.Module):
         h = g.ndata['feat']
         if self.f_use_gnn:
             h = self.rgcn(g, h)
-        # test = (g.ndata['feat']['prod']).view(128*2, 45, 300)
-        # unbatched_graph = dgl.unbatch(g)
-        #batch_size, max_len, hidden_dim
             batched_feats = (h['prod']).view(-1, self.products_max_num, self.hidden_dim)
         else:
             batched_feats = (h['prod']).view(-1, self.products_max_num, self.in_dim)
-        # batched_feats = (h['prod']).view(self.bs*2, self.products_max_num, 512)
-        # batched_feats = (h['prod']).view(256*2, 25, 300)
+
         return self.lstm_agg(batched_feats)
-        # with g.local_scope():
-        #     g.ndata['h'] = h
-        #     # Calculate graph representation by average readout.
-        #     hg = 0
-        #     for ntype in g.ntypes:
-        #         hg = hg + dgl.mean_nodes(g, 'h', ntype=ntype)
-        #     hg, (h_n, h_c) = self.lstm(hg)
-        #     hg = self.dropout(hg)
-        #     return self.activation(self.classify(hg))
+
         
 
+class HeteroRGCN(nn.Module):
+    def __init__(self, in_dim, hidden_dim, n_classes, rel_names, args, f_use_gnn):
+        super().__init__()
+        self.products_max_num = args.max_len
+        self.bs = args.batch_size
+        self.f_use_gnn = f_use_gnn
+        self.in_dim = in_dim
+        self.hidden_dim = hidden_dim
+
+        self.rgcn = RGCN(in_dim, hidden_dim, hidden_dim, rel_names)
+        self.classify = nn.Linear(hidden_dim, n_classes)
+
+    def forward(self, g):
+        h = g.ndata['feat']
+
+        h = self.rgcn(g, h)
+        # test = (g.ndata['feat']['prod']).view(128*2, 45, 300)
+        # unbatched_graph = dgl.unbatch(g)
+        #batch_size, max_len, hidden_dim
+
+        # batched_feats = (h['prod']).view(self.bs*2, self.products_max_num, 512)
+        # batched_feats = (h['prod']).view(256*2, 25, 300)
+        with g.local_scope():
+            g.ndata['h'] = h
+            # Calculate graph representation by average readout.
+            hg = 0
+            for ntype in g.ntypes:
+                hg = hg + dgl.mean_nodes(g, 'h', ntype=ntype)
+            return self.classify(hg)

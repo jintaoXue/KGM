@@ -1,0 +1,75 @@
+defaults:
+  seed: 0
+  batch_norm: false
+  batch_size: 256
+  bert_heads: 4
+  bert_hidden_dim: 256
+  bert_inter_dim: 1024
+  bert_layer_num: 4
+  bert_name: albert
+  bert_pos_dim: 64
+  class_num: 28
+  cnn_filters:
+  - !!python/tuple
+    - 1
+    - 8
+    - 5
+  - !!python/tuple
+    - 1
+    - 4
+    - 25
+  - !!python/tuple
+    - 1
+    - 2
+    - 45
+  cnn_inc: 1
+  cnn_st: 1
+  cuda: true
+  data_split: !!python/tuple
+  - 0.8
+  - 0.2
+  direction: true
+  dropout: 0.1
+  embed_dim: 300
+  embed_path: ./pretrain_info/embed_mat.txt
+  epoch_num: 3
+  fineg: true
+  full_mode: complex
+  gat_alpha: 0.1
+  gnn_conv_ch: 3
+  gnn_heads: 2
+  learning_r: 0.0001
+  load_graph_data: false
+  loss_func: margin_loss
+  lstm_hs: 512
+  lstm_layer: 2
+  max_len: 45
+  mlp_layer_dims:
+  - 512
+  - 512
+  model_name: gcn_lstm
+  neg_ratio: 2
+  nhop: 1
+  num_worker: 0
+  out_size: 300
+  rel_dic: 
+    constrains: 1
+    contains: 0
+  save_graph_data: false
+  tensor_max_len: 10
+  topk: 6
+  train_emebd: false
+  use_gnn: false
+  use_sp_data: false
+  use_trans: false
+  # logger configurations
+  logger_cfgs:
+    # use wandb for logging
+    use_wandb: false
+    # wandb project name
+    wandb_project: ProdMap
+    # use tensorboard for logging
+    use_tensorboard: false
+    # save model path
+    window_lens: 100
+

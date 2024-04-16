@@ -47,7 +47,7 @@ defaults:
   mlp_layer_dims:
   - 512
   - 512
-  model_name: gnn_lstm
+  model_name: gcn
   neg_ratio: 2
   nhop: 1
   num_worker: 0
