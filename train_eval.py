@@ -58,6 +58,7 @@ def train_evaluate(args, model, optimizer, loader, embed_matrix, id2word, word2i
     all_loss = []
     test_df = pd.DataFrame(columns=['hit@6', 'hit@3', 'hit@1']) #record test metrics
     train_df = pd.DataFrame(columns=['hit@6', 'hit@3', 'hit@1'])
+    device = torch.device("cuda:{}".format(args.gpu_id)) 
     if args.use_trans:
         print_bert_name = args.bert_name
     else:
@@ -101,25 +102,25 @@ def train_evaluate(args, model, optimizer, loader, embed_matrix, id2word, word2i
                         sp_labels_.append(torch.tensor(sl))
                          
             if args.cuda:
-                batch_products = batch_products.cuda()
-                embed_matrix = embed_matrix.cuda()
-                batch_data = batch_data.cuda()
-                batch_labels = batch_labels.cuda()
-                tasks_embeds = tasks_embeds.cuda()
-                batch_masks = batch_masks.cuda()
+                batch_products = batch_products.to(device)
+                embed_matrix = embed_matrix.to(device)
+                batch_data = batch_data.to(device)
+                batch_labels = batch_labels.to(device)
+                tasks_embeds = tasks_embeds.to(device)
+                batch_masks = batch_masks.to(device)
                 if args.use_sp_data:
-                    sp_labels_ = [sl.cuda() for sl in sp_labels_]
-                abs_tlabels = abs_tlabels.cuda()
-                model = model.to(torch.device('cuda:0'))
+                    sp_labels_ = [sl.to(device) for sl in sp_labels_]
+                abs_tlabels = abs_tlabels.to(device)
+                model = model.to(device)
                 if flag=='train':
-                    targets = targets.cuda()
+                    targets = targets.to(device)
             else:
                 model = model.to('cpu')
      
             if not gnn==None: # sp_batch_inputs ===> the AS-IS length of sptial triples in each input 
                 sp_batch_inputs = reconstruct_terms_form_ids(batch_products, gnn.all_term2id, word2id, id2word, args.rel_dic) # join the words into terms and label them using all_term2id
                 if args.cuda:
-                    gnn = gnn.to(torch.device('cuda:0'))
+                    gnn = gnn.to(device)
                 if flag=='train':
                     gnn_all_entity, gnn_all_rels = gnn(sp_batch_inputs, args) # input sp_triples (e.g., x constrains y & x contains y..) x,y = terms
                 else:
@@ -230,12 +231,11 @@ def train_evaluate(args, model, optimizer, loader, embed_matrix, id2word, word2i
         return all_loss, None, test_df, train_df
 
                                 
-def evaluate_complex_agg(tasks_embeds, outputs, orignal_labels, origin_len, cuda, topk=None, id2task=None, sp_labels=None, abs_tlabels=None, task2si=None, tid2tid=None, flag='train', full_mode='complex'): #id2task is for demonstration
+def evaluate_complex_agg(tasks_embeds, outputs, orignal_labels, origin_len, cuda, device, topk=None, id2task=None, sp_labels=None, abs_tlabels=None, task2si=None, tid2tid=None, flag='train', full_mode='complex'): #id2task is for demonstration
     all_preds = []
     all_scores = []
     all_pr_scores = []
     hit = 0
-    
     if flag=='evaluation' or full_mode=='simple': # the range searching is only applicable for testing
         task2id = {v:k for k, v in id2task.items()}
         for i, label in enumerate(orignal_labels): # here label is the current task label, the golden class = current batch_size
@@ -257,7 +257,7 @@ def evaluate_complex_agg(tasks_embeds, outputs, orignal_labels, origin_len, cuda
             task_ranges = task_ranges_sp
                 
             if cuda:
-                task_ranges = torch.tensor(task_ranges).cuda()
+                task_ranges = torch.tensor(task_ranges).to(device)
             else:
                 task_ranges =  torch.tensor(task_ranges)
             
@@ -362,6 +362,7 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
     all_loss = []
     test_df = pd.DataFrame(columns=['hit@6', 'hit@3', 'hit@1']) #record test metrics
     train_df = pd.DataFrame(columns=['hit@6', 'hit@3', 'hit@1'])
+    device = torch.device("cuda:{}".format(args.gpu_id)) 
     if args.use_trans:
         print_bert_name = args.bert_name
     else:
@@ -399,13 +400,13 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
             batch_labels_emb = torch.stack(batch_labels_emb)
             # batch_labels_emb.requires_grad=True
             if args.cuda:
-                batch_labels = batch_labels.cuda()
-                batch_labels_emb = batch_labels_emb.cuda()
-                origin_batch_labels = origin_batch_labels.cuda()
-                model = model.to(torch.device('cuda:0'))
-                batched_graph = batched_graph.to('cuda:0')
+                batch_labels = batch_labels.to(device)
+                batch_labels_emb = batch_labels_emb.to(device)
+                origin_batch_labels = origin_batch_labels.to(device)
+                model = model.to(device)
+                batched_graph = batched_graph.to(device)
                 if flag=='train':
-                    targets = targets.cuda()
+                    targets = targets.to(device)
             else:
                 model = model.to('cpu')
                 
@@ -422,11 +423,11 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
                 loss.backward(retain_graph=False)
                 optimizer.step()
                 # flops, params = utils.complexity_analyze(model, (batch_data, args, batch_masks))
-                train_hit6, _, _ = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, topk=6, sp_labels=sp_labels_,
+                train_hit6, _, _ = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, device, topk=6, sp_labels=sp_labels_,
                                                 task2si=task2si, tid2tid=tid2tid, id2task=id2task, flag=flag)
-                train_hit3, _, _ = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, topk=3, sp_labels=sp_labels_,
+                train_hit3, _, _ = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, device, topk=3, sp_labels=sp_labels_,
                                                 task2si=task2si, tid2tid=tid2tid, id2task=id2task, flag=flag)
-                train_hit1, _, _ = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, topk=1, sp_labels=sp_labels_, 
+                train_hit1, _, _ = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, device, topk=1, sp_labels=sp_labels_, 
                                                 task2si=task2si, tid2tid=tid2tid, id2task=id2task, flag=flag)
                 logger.store({
                     'Train/hit6': train_hit6,
@@ -445,11 +446,11 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
                     outputs = model(batched_graph, batched_graph.ndata['feat'])['task']
                 else:
                     outputs= model.forward(batched_graph)
-                test_hit6, _, _ = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, topk=6, sp_labels=sp_labels_, 
+                test_hit6, _, _ = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, device, topk=6, sp_labels=sp_labels_, 
                                                 task2si=task2si, tid2tid=tid2tid, id2task=id2task, flag=flag, full_mode=args.full_mode)
-                test_hit3, _, _ = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, topk=3, sp_labels=sp_labels_, 
+                test_hit3, _, _ = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, device, topk=3, sp_labels=sp_labels_, 
                                                 task2si=task2si, tid2tid=tid2tid, id2task=id2task, flag=flag, full_mode=args.full_mode)
-                test_hit1, preds, scores = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, topk=1, sp_labels=sp_labels_, 
+                test_hit1, preds, scores = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, device, topk=1, sp_labels=sp_labels_, 
                                                 task2si=task2si, tid2tid=tid2tid, id2task=id2task, flag=flag, full_mode=args.full_mode)
   
                 # complexity analysis --> time, FLOPs, and parameter size

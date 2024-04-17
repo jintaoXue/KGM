@@ -46,6 +46,7 @@ def parse_args():
     args.add_argument("-sgd", "--save_graph_data", default=False)
     args.add_argument("-wandb", "--use_wandb", default=False)
     args.add_argument("-debug", "--debug", default=False)
+    args.add_argument("-gpu_id", "--gpu_id", default=0)
     # MLP parameters
     args.add_argument("-ld", "--mlp_layer_dims", default=[512, 512], help="the dims of different layers for the MLP model")
     # LSTM parameters
@@ -106,7 +107,7 @@ if __name__ == '__main__':
               'floor plane':8}
 
     current_datetime = datetime.datetime.now()
-    setproctitle.setproctitle("xjt_{}".format(args.model_name))
+    
     formatted_datetime = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
     # config = Config(**arg_dic)
     result_save_path = os.path.dirname(__file__) + "/graph_results"
@@ -126,7 +127,7 @@ if __name__ == '__main__':
         data_name = "_no_spatial"
         task2si = None
     cfg.exp_name = args.model_name + data_name + '-' + formatted_datetime
-
+    setproctitle.setproctitle("xjt_{}".format(cfg.exp_name))
     logger : Logger = init_log(cfg)
     if args.debug:
         train_data, dev_data = generate_data(all_products[:2000], all_task_labels[:2000], word2id, task2id, args.max_len, data_split=args.data_split, id2word=id2word, sp_dic=sp_dic)
