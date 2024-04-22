@@ -711,15 +711,15 @@ def generate_batch_data(batch_rows, embed_matrix, id2word, word2id, args, sp_dir
 
 
 def generate_one_data_embedding(words, embed_matrix, id2word, word2id, args, sp_dir=None): # generate batch (embeddings) for both products and task labels
-
+    device = torch.device("cuda:{}".format(args.gpu_id))
     init_word = id2word[words[0]]
     if not init_word == 'PAD':
         temp_ids = torch.tensor([word_id for word_id in words if not id2word[word_id]=='PAD'])
     else:
         temp_ids = torch.tensor([word2id['PAD']]) # here only one element is ok
     if args.cuda:
-        temp_ids = temp_ids.cuda()
-        embed_matrix = embed_matrix.cuda()
+        temp_ids = temp_ids.to(device)
+        embed_matrix = embed_matrix.to(device)
     temp_embds = torch.index_select(embed_matrix, 0, temp_ids) # embedding for the current product/term
     embd = torch.mean(temp_embds, 0) # get average of the terms
     return embd
