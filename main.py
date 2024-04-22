@@ -172,11 +172,11 @@ if __name__ == '__main__':
     if args.model_name == 'gcn':
         model = HeteroRGCN(in_dim=args.embed_dim, hidden_dim=1024, n_classes=args.embed_dim, rel_names=graph_train_datasets.etypes, args=args)
     elif args.model_name == 'lstm':
-        model = HeteroClassifier(in_dim=args.embed_dim, hidden_dim=192, n_classes=args.embed_dim, rel_names=graph_train_datasets.etypes, args=args, f_use_gnn = False)
+        model = HeteroClassifier(in_dim=args.embed_dim, hidden_dim=256, n_classes=args.embed_dim, rel_names=graph_train_datasets.etypes, args=args, f_use_gnn = False)
     elif args.model_name == 'gcn_lstm':
-        model = HeteroClassifier(in_dim=args.embed_dim, hidden_dim=192, n_classes=args.embed_dim, rel_names=graph_train_datasets.etypes, args=args, f_use_gnn = True)
+        model = HeteroClassifier(in_dim=args.embed_dim, hidden_dim=256, n_classes=args.embed_dim, rel_names=graph_train_datasets.etypes, args=args, f_use_gnn = True)
     elif args.model_name == 'simple_hgn':
-        model = SimpleHGN(edge_dim=args.embed_dim, num_etypes=len(graph_train_datasets.etypes), in_dim=args.embed_dim, hidden_dim=128, num_classes=args.embed_dim,
+        model = SimpleHGN(edge_dim=args.embed_dim, num_etypes=len(graph_train_datasets.etypes), in_dim=args.embed_dim, hidden_dim=256, num_classes=args.embed_dim,
             num_layers=4, heads= [4, 4, 4, 1], feat_drop=0.1, negative_slope=0.1,
             residual=False, beta=0.05, ntypes=graph_train_datasets.ntypes)    
 

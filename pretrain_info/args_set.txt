@@ -2,7 +2,7 @@ use_sp_data : True : <class 'str'>
 fineg : True : <class 'bool'>
 rel_dic : {'contains': 0, 'constrains': 1} : <class 'dict'>
 full_mode : complex : <class 'str'>
-model_name : gcn_lstm : <class 'str'>
+model_name : simple_hgn : <class 'str'>
 topk : 6 : <class 'int'>
 class_num : 28 : <class 'int'>
 learning_r : 0.0001 : <class 'float'>
