@@ -405,6 +405,7 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
                 origin_batch_labels = origin_batch_labels.to(device)
                 model = model.to(device)
                 batched_graph = batched_graph.to(device)
+                tasks_embeds = tasks_embeds.to(device)
                 if flag=='train':
                     targets = targets.to(device)
             else:
