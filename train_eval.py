@@ -416,6 +416,8 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
                 # outputs, _ = model.forward(batch_data, batch_masks=batch_masks)  
                 if args.model_name == 'simple_hgn':
                     outputs = model(batched_graph, batched_graph.ndata['feat'])['task']
+                elif args.model_name == 'gcn':
+                    outputs = model(batched_graph)['task']
                 else:
                     outputs= model.forward(batched_graph)
                 loss, loss_func = get_batch_loss(outputs, batch_labels_emb, targets=targets, loss_name=args.loss_func, origin_len=origin_len)
@@ -445,6 +447,8 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
                 time_s = time.time() # recording time
                 if args.model_name == 'simple_hgn':
                     outputs = model(batched_graph, batched_graph.ndata['feat'])['task']
+                elif args.model_name == 'gcn':
+                    outputs = model(batched_graph)['task']
                 else:
                     outputs= model.forward(batched_graph)
                 test_hit6, _, _ = evaluate_complex_agg(tasks_embeds, outputs, origin_batch_labels.data, origin_len, args.cuda, device, topk=6, sp_labels=sp_labels_, 

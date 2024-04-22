@@ -142,8 +142,8 @@ class HeteroRGCN(nn.Module):
         self.in_dim = in_dim
         self.hidden_dim = hidden_dim
 
-        self.rgcn = RGCN(in_dim, hidden_dim, hidden_dim, rel_names)
-        self.classify = nn.Linear(hidden_dim, n_classes)
+        self.rgcn = RGCN(in_dim, hidden_dim, in_dim, rel_names)
+        # self.classify = nn.Linear(hidden_dim, n_classes)
 
     def forward(self, g):
         h = g.ndata['feat']
@@ -155,10 +155,11 @@ class HeteroRGCN(nn.Module):
 
         # batched_feats = (h['prod']).view(self.bs*2, self.products_max_num, 512)
         # batched_feats = (h['prod']).view(256*2, 25, 300)
-        with g.local_scope():
-            g.ndata['h'] = h
-            # Calculate graph representation by average readout.
-            hg = 0
-            for ntype in g.ntypes:
-                hg = hg + dgl.mean_nodes(g, 'h', ntype=ntype)
-            return self.classify(hg)
+        return h
+        # with g.local_scope():
+        #     g.ndata['h'] = h
+        #     # Calculate graph representation by average readout.
+        #     hg = 0
+        #     for ntype in g.ntypes:
+        #         hg = hg + dgl.mean_nodes(g, 'h', ntype=ntype)
+        #     return self.classify(hg)
