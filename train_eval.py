@@ -378,6 +378,9 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
     all_labels = []
     all_scores = []
     all_pr_scores = []
+    all_hit1 = []
+    all_hit3 = []
+    all_hit6 = []
     test_step = 0
     for epoch in range(epoch_num):
         print('current epoch: ', epoch)
@@ -483,6 +486,9 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
                                           'hit@1':test_hit1,
                                           'compute_time': time_lag},ignore_index=True)
                 test_step += 1
+                all_hit1.append(test_hit1)
+                all_hit3.append(test_hit3)
+                all_hit6.append(test_hit6) 
                 all_preds.append(preds)
                 all_scores.append(scores[0])
                 all_pr_scores.append(scores[1])
@@ -510,21 +516,27 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
         #cm_metric.plot_confusion_matrix(all_labels, all_preds, os.path.join(os.getcwd(), 'cm'), normalize=True)
         if logger._use_wandb:
             # define our custom x axis metric
-            wandb.define_metric("Test/step")
+            wandb.define_metric("Test2/step")
             # set all other train/ metrics to use this step
-            wandb.define_metric("Test/*", step_metric="Test/step")
+            wandb.define_metric("Test2/*", step_metric="Test2/step")
             mean_precision =  np.mean(list(precision_scores.values())).squeeze(0)
             mean_recall =  np.mean(list(recall_scores.values())).squeeze(0)
             mean_f1 = np.mean(list(f1_scores.values())).squeeze(0)
+            mean_hit1 = np.mean(all_hit1)
+            mean_hit3 = np.mean(all_hit3)
+            mean_hit6 = np.mean(all_hit6)
             for i, precision, recall, f1 in zip(range(0,len(precision_scores.values())),precision_scores.values(), recall_scores.values(), f1_scores.values()):
                 log_dict = {
-                        "Test/step" : i,
-                        'Test/precision': precision,
-                        'Test/recall': recall,
-                        'Test/f1': f1,
-                        'Test/mean_precision': mean_precision,
-                        'Test/mean_recall': mean_recall,
-                        'Test/mean_f1': mean_f1,
+                        "Test2/step" : i,
+                        'Test2/precision': precision,
+                        'Test2/recall': recall,
+                        'Test2/f1': f1,
+                        'Test2/mean_precision': mean_precision,
+                        'Test2/mean_recall': mean_recall,
+                        'Test2/mean_f1': mean_f1,
+                        'Test2/mean_hit1': mean_hit1,
+                        'Test2/mean_hit3': mean_hit3,
+                        'Test2/mean_hit6': mean_hit6,
                     }
                 wandb.log(log_dict)
             roc_data = [[x, y] for (x, y) in zip(fprs, tprs)]
