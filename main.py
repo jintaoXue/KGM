@@ -169,11 +169,11 @@ if __name__ == '__main__':
     '''step 2: create models'''
     # model, gnn_model = train_eval.select_model(args=args, corpus=corpus, all_products=all_products, word2id=word2id, id2word=id2word, 
     #                                            ent_embeds=embed_matrix, cluster_or_granu=False, all_term2id=None)
-    if args.model_name == 'gcn':
+    if args.model_name == 'rgcn':
         model = HeteroRGCN(in_dim=args.embed_dim, hidden_dim=2048, n_classes=args.embed_dim, rel_names=graph_train_datasets.etypes, args=args)
     elif args.model_name == 'lstm':
         model = HeteroClassifier(in_dim=args.embed_dim, hidden_dim=256, n_classes=args.embed_dim, rel_names=graph_train_datasets.etypes, args=args, f_use_gnn = False)
-    elif args.model_name == 'gcn_lstm':
+    elif args.model_name == 'rgcn_lstm':
         model = HeteroClassifier(in_dim=args.embed_dim, hidden_dim=256, n_classes=args.embed_dim, rel_names=graph_train_datasets.etypes, args=args, f_use_gnn = True)
     elif args.model_name == 'simple_hgn':
         model = SimpleHGN(edge_dim=args.embed_dim, num_etypes=len(graph_train_datasets.etypes), in_dim=args.embed_dim, hidden_dim=512, num_classes=args.embed_dim,

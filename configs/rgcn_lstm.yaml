@@ -47,7 +47,7 @@ defaults:
   mlp_layer_dims:
   - 512
   - 512
-  model_name: gcn
+  model_name: rgcn_lstm
   neg_ratio: 2
   nhop: 1
   num_worker: 0
@@ -59,7 +59,7 @@ defaults:
   tensor_max_len: 10
   topk: 6
   train_emebd: false
-  use_gnn: false
+  use_gnn: true
   use_sp_data: false
   use_trans: false
   # logger configurations

@@ -416,7 +416,7 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
                 # outputs, _ = model.forward(batch_data, batch_masks=batch_masks)  
                 if args.model_name == 'simple_hgn':
                     outputs = model(batched_graph, batched_graph.ndata['feat'])['task']
-                elif args.model_name == 'gcn':
+                elif args.model_name == 'rgcn':
                     outputs = model(batched_graph)['task']
                 else:
                     outputs= model.forward(batched_graph)
@@ -447,7 +447,7 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
                 time_s = time.time() # recording time
                 if args.model_name == 'simple_hgn':
                     outputs = model(batched_graph, batched_graph.ndata['feat'])['task']
-                elif args.model_name == 'gcn':
+                elif args.model_name == 'rgcn':
                     outputs = model(batched_graph)['task']
                 else:
                     outputs= model.forward(batched_graph)
