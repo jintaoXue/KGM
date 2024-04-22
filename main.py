@@ -191,32 +191,32 @@ if __name__ == '__main__':
         all_loss, res, _, train_df = train_eval.train_evaluate2(args, logger, model, optimizer, train_loader, embed_matrix, id2word, word2id, tasks_embeds, 
                             gnn=gnn_model, id2task=id2task, task2si=task2si, tid2tid=None, flag='train')
         
-        dic_info_pth = 'pretrain_info/dics.json'
-        dic_info={}
-        if gnn_model is not None:
-            model_pth = './pretrain_info/agg_gnn.pkl'
-            gnn_pth = './pretrain_info/gnn.pkl'        
-            torch.save({'model': model.state_dict()}, model_pth)
-            torch.save({'model': gnn_model.state_dict()}, gnn_pth)
-            write_tensor(res[0], 'pretrain_info/gnn_ent_embeds.txt')
-            write_tensor(res[1], 'pretrain_info/gnn_rel_embeds.txt')
-            dic_info.update({'term2id':gnn_model.all_term2id})
-        else:
-            model_pth = './pretrain_info/agg.pkl'
-            torch.save({'model': model.state_dict()}, model_pth)
+        # dic_info_pth = 'pretrain_info/dics.json'
+        # dic_info={}
+        # if gnn_model is not None:
+        #     model_pth = './pretrain_info/agg_gnn.pkl'
+        #     gnn_pth = './pretrain_info/gnn.pkl'        
+        #     torch.save({'model': model.state_dict()}, model_pth)
+        #     torch.save({'model': gnn_model.state_dict()}, gnn_pth)
+        #     write_tensor(res[0], 'pretrain_info/gnn_ent_embeds.txt')
+        #     write_tensor(res[1], 'pretrain_info/gnn_rel_embeds.txt')
+        #     dic_info.update({'term2id':gnn_model.all_term2id})
+        # else:
+        #     model_pth = './pretrain_info/agg.pkl'
+        #     torch.save({'model': model.state_dict()}, model_pth)
         
-        dic_info.update({'word2id':word2id})
-        dic_info.update({'id2word':id2word})
-        dic_info.update({'task2id':task2id})
-        dic_info.update({'id2task':id2task})
-        dic_info.update({'corpus':corpus})
-        with open(os.path.join(os.getcwd(), dic_info_pth), mode='w') as jf:
-            json.dump(dic_info, jf)
-        jf.close() 
+        # dic_info.update({'word2id':word2id})
+        # dic_info.update({'id2word':id2word})
+        # dic_info.update({'task2id':task2id})
+        # dic_info.update({'id2task':id2task})
+        # dic_info.update({'corpus':corpus})
+        # with open(os.path.join(os.getcwd(), dic_info_pth), mode='w') as jf:
+        #     json.dump(dic_info, jf)
+        # jf.close() 
         
-        write_tensor(embed_matrix, 'pretrain_info/embed_mat.txt')
-        write_tensor(tasks_embeds, 'pretrain_info/task_embed.txt')
-        write_tensor(task_ids.squeeze(1), 'pretrain_info/task_ids.txt')
+        # write_tensor(embed_matrix, 'pretrain_info/embed_mat.txt')
+        # write_tensor(tasks_embeds, 'pretrain_info/task_embed.txt')
+        # write_tensor(task_ids.squeeze(1), 'pretrain_info/task_ids.txt')
         
         all_loss = pd.DataFrame({'loss': [l.data.cpu().detach().numpy() for l in all_loss]})
         all_loss.to_csv('./results/loss.csv', mode='a')
