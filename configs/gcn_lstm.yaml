@@ -59,7 +59,7 @@ defaults:
   tensor_max_len: 10
   topk: 6
   train_emebd: false
-  use_gnn: false
+  use_gnn: true
   use_sp_data: false
   use_trans: false
   # logger configurations

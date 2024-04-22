@@ -135,11 +135,10 @@ class HeteroClassifier(nn.Module):
         
 
 class HeteroRGCN(nn.Module):
-    def __init__(self, in_dim, hidden_dim, n_classes, rel_names, args, f_use_gnn):
+    def __init__(self, in_dim, hidden_dim, n_classes, rel_names, args):
         super().__init__()
         self.products_max_num = args.max_len
         self.bs = args.batch_size
-        self.f_use_gnn = f_use_gnn
         self.in_dim = in_dim
         self.hidden_dim = hidden_dim
 

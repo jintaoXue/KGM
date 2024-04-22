@@ -691,6 +691,7 @@ def generate_data(all_products, task_labels, word2id, task2id, max_len, sp_dic=N
 
 def generate_batch_data(batch_rows, embed_matrix, id2word, word2id, args, sp_dir=None): # generate batch (embeddings) for both products and task labels
     batch_res = []
+    device = torch.device("cuda:{}".format(args.gpu_id))
     for i, row in enumerate(batch_rows): # batch_products: batch_size, max_len (e.g., 10 or 15), tensor_max_len (e.g., 5 or 10)
         temp_res_embeds = []
         for k, words in enumerate(row): # row=products for one task; words=product, which is a product name containing certain words          
@@ -700,8 +701,8 @@ def generate_batch_data(batch_rows, embed_matrix, id2word, word2id, args, sp_dir
             else:
                 temp_ids = torch.tensor([word2id['PAD']]) # here only one element is ok
             if args.cuda:
-                temp_ids = temp_ids.cuda()
-                embed_matrix = embed_matrix.cuda()
+                temp_ids = temp_ids.to(device)
+                embed_matrix = embed_matrix.to(device)
             temp_embds = torch.index_select(embed_matrix, 0, temp_ids) # embedding for the current product/term
             temp_embds = torch.mean(temp_embds, 0) # get average of the terms
             temp_res_embeds.append(temp_embds) # products_embeds: list, each element is max_len (e.g., 10) * (embed_dim, )

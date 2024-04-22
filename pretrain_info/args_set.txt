@@ -25,6 +25,7 @@ load_graph_data : False : <class 'bool'>
 save_graph_data : False : <class 'bool'>
 use_wandb : False : <class 'bool'>
 debug : True : <class 'str'>
+gpu_id : 0 : <class 'int'>
 mlp_layer_dims : [512, 512] : <class 'list'>
 lstm_hs : 512 : <class 'int'>
 lstm_layer : 2 : <class 'int'>
