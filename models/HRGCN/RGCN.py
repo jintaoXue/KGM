@@ -142,13 +142,15 @@ class HeteroRGCN(nn.Module):
         self.in_dim = in_dim
         self.hidden_dim = hidden_dim
 
-        self.rgcn = RGCN(in_dim, hidden_dim, in_dim, rel_names)
+        self.rgcn_in = RGCN(in_dim, hidden_dim, hidden_dim, rel_names)
+        self.rgcn_out = RGCN(hidden_dim, hidden_dim, in_dim, rel_names)
         # self.classify = nn.Linear(hidden_dim, n_classes)
 
     def forward(self, g):
         h = g.ndata['feat']
 
-        h = self.rgcn(g, h)
+        h = self.rgcn_in(g, h)
+        h = self.rgcn_out(g, h)
         # test = (g.ndata['feat']['prod']).view(128*2, 45, 300)
         # unbatched_graph = dgl.unbatch(g)
         #batch_size, max_len, hidden_dim
