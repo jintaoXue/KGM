@@ -541,7 +541,8 @@ def train_evaluate2(args, logger:Logger, model:HeteroClassifier, optimizer, load
                 wandb.log(log_dict)
             roc_data = [[x, y] for (x, y) in zip(fprs, tprs)]
             auc_data = [[x,roc_aucs] for x in np.arange(0,1,0.1)]
-            pr_data = [[x, y] for (x, y) in zip(recalls, precs)]
+            ##warning wandb only accept max length 20000, so we do down sampling for data
+            pr_data = [[x, y] for (x, y) in zip(recalls[::2], precs[::2])]
             roc_table = wandb.Table(data=roc_data, columns=["FPR", "TPR"])
             auc_table = wandb.Table(data=auc_data, columns=["x", "y"])
             pr_table = wandb.Table(data=pr_data, columns=["Recall", "Precision"])

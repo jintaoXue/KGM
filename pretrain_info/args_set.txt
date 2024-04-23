@@ -2,13 +2,13 @@ use_sp_data : True : <class 'str'>
 fineg : True : <class 'bool'>
 rel_dic : {'contains': 0, 'constrains': 1} : <class 'dict'>
 full_mode : complex : <class 'str'>
-model_name : rgcn : <class 'str'>
+model_name : simple_hgn : <class 'str'>
 topk : 6 : <class 'int'>
 class_num : 28 : <class 'int'>
 learning_r : 0.0001 : <class 'float'>
 embed_path : ./pretrain_info/embed_mat.txt : <class 'str'>
 embed_dim : 300 : <class 'int'>
-epoch_num : 3 : <class 'int'>
+epoch_num : 4 : <class 'int'>
 data_split : (0.8, 0.2) : <class 'tuple'>
 max_len : 45 : <class 'int'>
 tensor_max_len : 10 : <class 'int'>
@@ -24,7 +24,7 @@ batch_norm : False : <class 'bool'>
 load_graph_data : False : <class 'bool'>
 save_graph_data : False : <class 'bool'>
 use_wandb : False : <class 'bool'>
-debug : True : <class 'str'>
+debug : False : <class 'bool'>
 gpu_id : 0 : <class 'int'>
 mlp_layer_dims : [512, 512] : <class 'list'>
 lstm_hs : 512 : <class 'int'>

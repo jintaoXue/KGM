@@ -301,19 +301,249 @@ def draw_prcurve(pr_path, figure_out_path):
     plt.savefig(figure_out_path, dpi=300)
     plt.show()
     
+def draw_train_metric_from_csv_res(loss_path, hit1_path, hit3_path, hit6_path):
+    import matplotlib.pyplot as plt 
+    import matplotlib.colors as mcolors 
+    def get_cmap(n, name='hsv'):
+        '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
+        RGB color; the keyword argument name must be a standard mpl colormap name.'''
+        return plt.cm.get_cmap(name, n)
+        # return plt.colormaps.get_cmap(name, n)
+    cmap = get_cmap(22)
+    color_inter_num = 6
+
+    color_dict = {0: 'darkorange', 4: 'orange', 2: 'forestgreen', 3: 'dodgerblue', 1: 'palevioletred', 5:'blueviolet'}
+    # https://matplotlib.org/stable/gallery/style_sheets/style_sheets_reference.html
+    styles_dict = plt.style.available
+    
+
+    # for i in range(0, self._num_action):
+    #     x,y,yaw = _sdc_trj[i,:,0], _sdc_trj[i,:,1], _sdc_trj[i,:,2]
+    #     plt.plot(x, y, '-', color=cmap(i), ms=5, linewidth=2)
+    #     for j in range(0, horizon):
+    #         plt.arrow(x[j], y[j], torch.cos(yaw[j])/5, torch.sin(yaw[j])/5, width=0.01, head_width=0.03, head_length=0.02, fc=cmap(i),ec=cmap(i))
+
+    # plt.style.use('fast')
+    plt.style.use('seaborn-v0_8-white')
+    # plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams['pdf.fonttype'] = 42
+    fig = plt.figure(figsize=(10,10), dpi=100)
+    # gs = gridspec(1,4, )
+    # gs = fig.add_gridspec(1,4) 
+    ax_1 = plt.subplot(241)
+    ax_2 = plt.subplot(245)
+    ax_3 = plt.subplot(242)
+    ax_4 = plt.subplot(246)
+    ax_5 = plt.subplot(243)
+    ax_6 = plt.subplot(247)
+    ax_7 = plt.subplot(244)
+    ax_8 = plt.subplot(248)
+    for ax in fig.get_axes():
+        ax.grid(True)
+    interval = 500
+    '''loss curve plot'''
+    df = pd.read_csv(loss_path, header=None)
+    # all_items = df.iloc[0]
+    #one column is one data
+    one_data_len = len(df) - 1
+    x_data = np.arange(0, one_data_len)
+    ax_1.set_title('Loss\Without Spatial Information', fontsize = 12)
+    # ax_1.set_xlabel('Number Agents', fontsize=15)
+    ax_1.set_ylabel('Training loss', fontsize=15)
+    ax_2.set_title('Loss\With Spatial Information', fontsize = 12)
+    ax_2.set_xlabel('Steps', fontsize=15)
+    ax_2.set_ylabel('Training loss', fontsize=15)
+    for i in np.arange(0, len(df.columns)):
+        one_data = df[i]
+        data_name = one_data[0]
+        data = np.array(one_data[1:]).astype(float)
+        suffix = data_name.split('__')[-1]
+        if data_name == "Step" or suffix == 'MIN' or suffix == 'MIN':
+            continue 
+        if "no_spatial" in data_name:
+            if 'simple_hgn' in data_name or 'hgn-mc' in data_name:
+                ax_1.plot(x_data, data, '-', color=color_dict[0], label='HGN-MC',ms=5, linewidth=2)
+            if 'rgcn' in data_name and 'rgcn_lstm' not in data_name:
+                ax_1.plot(x_data, data, '-', color=color_dict[1], label='RGCN',ms=5, linewidth=2)
+            if 'lstm' in data_name and 'rgcn_lstm' not in data_name:
+                ax_1.plot(x_data, data, '-', color=color_dict[2], label='BiLSTM',ms=5, linewidth=2)
+            if 'rgcn_lstm' in data_name:
+                ax_1.plot(x_data, data, '-', color=color_dict[3], label='RGCN-BiLSTM',ms=5, linewidth=2)
+        else:
+            if 'simple_hgn' in data_name or 'hgn-mc' in data_name:
+                ax_2.plot(x_data, data, '-', color=color_dict[0], label='HGN-MC',ms=5, linewidth=2)
+            if 'rgcn' in data_name and 'rgcn_lstm' not in data_name:
+                ax_2.plot(x_data, data, '-', color=color_dict[1], label='RGCN',ms=5, linewidth=2)
+            if 'lstm' in data_name and 'rgcn_lstm' not in data_name:
+                ax_2.plot(x_data, data, '-', color=color_dict[2], label='BiLSTM',ms=5, linewidth=2)
+            if 'rgcn_lstm' in data_name:
+                ax_2.plot(x_data, data, '-', color=color_dict[3], label='RGCN-BiLSTM',ms=5, linewidth=2)
+    '''hit1 curve plot'''
+    df = pd.read_csv(hit1_path, header=None)
+    # all_items = df.iloc[0]
+    #one column is one data
+    one_data_len = len(df) - 1
+    x_data = np.arange(0, one_data_len)
+    ax_3.set_title('Hit@1\Without Spatial Information', fontsize = 12)
+    # ax_1.set_xlabel('Number Agents', fontsize=15)
+    ax_3.set_ylabel('Hit@1', fontsize=15)
+    ax_4.set_title('Hit@1\With Spatial Information', fontsize = 12)
+    ax_4.set_xlabel('Steps', fontsize=15)
+    ax_4.set_ylabel('Hit@1', fontsize=15)
+    for i in np.arange(0, len(df.columns)):
+        one_data = df[i]
+        data_name = one_data[0]
+        data = np.array(one_data[1:]).astype(float)
+        suffix = data_name.split('__')[-1]
+        if data_name == "Step" or suffix == 'MIN' or suffix == 'MIN':
+            continue 
+        if "no_spatial" in data_name:
+            if 'simple_hgn' in data_name or 'hgn-mc' in data_name:
+                ax_3.plot(x_data, data, '-', color=color_dict[0], label='HGN-MC',ms=5, linewidth=2)
+            if 'rgcn' in data_name and 'rgcn_lstm' not in data_name:
+                ax_3.plot(x_data, data, '-', color=color_dict[1], label='RGCN',ms=5, linewidth=2)
+            if 'lstm' in data_name and 'rgcn_lstm' not in data_name:
+                ax_3.plot(x_data, data, '-', color=color_dict[2], label='BiLSTM',ms=5, linewidth=2)
+            if 'rgcn_lstm' in data_name:
+                ax_3.plot(x_data, data, '-', color=color_dict[3], label='RGCN-BiLSTM',ms=5, linewidth=2)
+        else:
+            if 'simple_hgn' in data_name or 'hgn-mc' in data_name:
+                ax_4.plot(x_data, data, '-', color=color_dict[0], label='HGN-MC',ms=5, linewidth=2)
+            if 'rgcn' in data_name and 'rgcn_lstm' not in data_name:
+                ax_4.plot(x_data, data, '-', color=color_dict[1], label='RGCN',ms=5, linewidth=2)
+            if 'lstm' in data_name and 'rgcn_lstm' not in data_name:
+                ax_4.plot(x_data, data, '-', color=color_dict[2], label='BiLSTM',ms=5, linewidth=2)
+            if 'rgcn_lstm' in data_name:
+                ax_4.plot(x_data, data, '-', color=color_dict[3], label='RGCN-BiLSTM',ms=5, linewidth=2)
+    '''hit3 curve plot'''
+    df = pd.read_csv(hit3_path, header=None)
+    # all_items = df.iloc[0]
+    #one column is one data
+    one_data_len = len(df) - 1
+    x_data = np.arange(0, one_data_len)
+    ax_5.set_title('Hit@3\Without Spatial Information', fontsize = 12)
+    # ax_1.set_xlabel('Number Agents', fontsize=15)
+    ax_5.set_ylabel('Hit@3', fontsize=15)
+    ax_6.set_title('Hit@3\With Spatial Information', fontsize = 12)
+    ax_6.set_xlabel('Steps', fontsize=15)
+    ax_6.set_ylabel('Hit@3', fontsize=15)
+    for i in np.arange(0, len(df.columns)):
+        one_data = df[i]
+        data_name = one_data[0]
+        data = np.array(one_data[1:]).astype(float)
+        suffix = data_name.split('__')[-1]
+        if data_name == "Step" or suffix == 'MIN' or suffix == 'MIN':
+            continue 
+        if "no_spatial" in data_name:
+            if 'simple_hgn' in data_name or 'hgn-mc' in data_name:
+                ax_5.plot(x_data, data, '-', color=color_dict[0], label='HGN-MC',ms=5, linewidth=2)
+            if 'rgcn' in data_name and 'rgcn_lstm' not in data_name:
+                ax_5.plot(x_data, data, '-', color=color_dict[1], label='RGCN',ms=5, linewidth=2)
+            if 'lstm' in data_name and 'rgcn_lstm' not in data_name:
+                ax_5.plot(x_data, data, '-', color=color_dict[2], label='BiLSTM',ms=5, linewidth=2)
+            if 'rgcn_lstm' in data_name:
+                ax_5.plot(x_data, data, '-', color=color_dict[3], label='RGCN-BiLSTM',ms=5, linewidth=2)
+        else:
+            if 'simple_hgn' in data_name or 'hgn-mc' in data_name:
+                ax_6.plot(x_data, data, '-', color=color_dict[0], label='HGN-MC',ms=5, linewidth=2)
+            if 'rgcn' in data_name and 'rgcn_lstm' not in data_name:
+                ax_6.plot(x_data, data, '-', color=color_dict[1], label='RGCN',ms=5, linewidth=2)
+            if 'lstm' in data_name and 'rgcn_lstm' not in data_name:
+                ax_6.plot(x_data, data, '-', color=color_dict[2], label='BiLSTM',ms=5, linewidth=2)
+            if 'rgcn_lstm' in data_name:
+                ax_6.plot(x_data, data, '-', color=color_dict[3], label='RGCN-BiLSTM',ms=5, linewidth=2)
+    '''hit6 curve plot'''
+    df = pd.read_csv(hit6_path, header=None)
+    # all_items = df.iloc[0]
+    #one column is one data
+    one_data_len = len(df) - 1
+    x_data = np.arange(0, one_data_len)
+    ax_7.set_title('Hit@6\Without Spatial Information', fontsize = 12)
+    # ax_1.set_xlabel('Number Agents', fontsize=15)
+    ax_7.set_ylabel('Hit@6', fontsize=15)
+    ax_8.set_title('Hit@6\With Spatial Information', fontsize = 12)
+    ax_8.set_xlabel('Steps', fontsize=15)
+    ax_8.set_ylabel('Hit@6', fontsize=15)
+    for i in np.arange(0, len(df.columns)):
+        one_data = df[i]
+        data_name = one_data[0]
+        data = np.array(one_data[1:]).astype(float)
+        suffix = data_name.split('__')[-1]
+        if data_name == "Step" or suffix == 'MIN' or suffix == 'MIN':
+            continue 
+        if "no_spatial" in data_name:
+            if 'simple_hgn' in data_name or 'hgn-mc' in data_name:
+                ax_7.plot(x_data, data, '-', color=color_dict[0], label='HGN-MC',ms=5, linewidth=2)
+            if 'rgcn' in data_name and 'rgcn_lstm' not in data_name:
+                ax_7.plot(x_data, data, '-', color=color_dict[1], label='RGCN',ms=5, linewidth=2)
+            if 'lstm' in data_name and 'rgcn_lstm' not in data_name:
+                ax_7.plot(x_data, data, '-', color=color_dict[2], label='BiLSTM',ms=5, linewidth=2)
+            if 'rgcn_lstm' in data_name:
+                ax_7.plot(x_data, data, '-', color=color_dict[3], label='RGCN-BiLSTM',ms=5, linewidth=2)
+        else:
+            if 'simple_hgn' in data_name or 'hgn-mc' in data_name:
+                ax_8.plot(x_data, data, '-', color=color_dict[0], label='HGN-MC',ms=5, linewidth=2)
+            if 'rgcn' in data_name and 'rgcn_lstm' not in data_name:
+                ax_8.plot(x_data, data, '-', color=color_dict[1], label='RGCN',ms=5, linewidth=2)
+            if 'lstm' in data_name and 'rgcn_lstm' not in data_name:
+                ax_8.plot(x_data, data, '-', color=color_dict[2], label='BiLSTM',ms=5, linewidth=2)
+            if 'rgcn_lstm' in data_name:
+                ax_8.plot(x_data, data, '-', color=color_dict[3], label='RGCN-BiLSTM',ms=5, linewidth=2)
+    
+    # c=[1,2,3,4]
+    # labels = ['HGN-MC', 'RGCN', 'BiLSTM', 'RGCN-BiLSTM']
+    # cmap = mcolors.ListedColormap(['darkorange','palevioletred','forestgreen','dodgerblue'])
+    # norm = mcolors.BoundaryNorm([1,2,3,4,5],4)
+    # sm = plt.cm.ScalarMappable(norm=norm, cmap=cmap)
+    # # cbar=plt.colorbar(sm, ticks=c, orientation='horizontal')
+    # cbar = plt.colorbar(sm,ax=ax_8, orientation='horizontal', ticks=c)
+    # cbar.set_ticklabels(labels)
+
+    # pos = ax_4.get_position()
+    # ax_4.set_position([pos.x0, pos.y0, pos.width, pos.height * 0.85])
+    ax_1.legend(
+        loc='upper right', 
+        bbox_to_anchor=(1.0, 0.9),
+        ncol=1, 
+        fontsize="10"
+    )
+    plt.show(block=False)
+    fig.tight_layout()
+    fig.savefig('{}.pdf'.format('./' + 'training_curves'), bbox_inches='tight')
+
+    return
+
+
+
+def draw_test_metric_from_csv_res(loss_path, hit1_path, hit3_path, hit6_path):
+
+
+    pass
+
 
 '''=========================================================Main drawing code=========================================================='''
 if __name__ == '__main__':
+    ###loss curves
+    loss_results_path = os.path.dirname(__file__) + "/graph_results/aWandb" + "/wandb_train_loss.csv"
+    hit1_results_path = os.path.dirname(__file__) + "/graph_results/aWandb" + "/wandb_hit1.csv"
+    hit3_results_path = os.path.dirname(__file__) + "/graph_results/aWandb" + "/wandb_hit3.csv"
+    hit6_results_path = os.path.dirname(__file__) + "/graph_results/aWandb" + "/wandb_hit6.csv"
+    draw_train_metric_from_csv_res(loss_results_path, hit1_results_path, hit3_results_path, hit6_results_path)
+
+
+    draw_test_metric_from_csv_res(loss_results_path, hit1_results_path, hit3_results_path, hit6_results_path)
     
-    draw_roc(os.path.join(os.getcwd(), 'results/tfr_df.csv'), 
-             os.path.join(os.getcwd(), 'results/roc_df.csv'), 
-             os.path.join(os.getcwd(), 'roc'))
+
+
+    # draw_roc(os.path.join(os.getcwd(), 'results/tfr_df.csv'), 
+    #          os.path.join(os.getcwd(), 'results/roc_df.csv'), 
+    #          os.path.join(os.getcwd(), 'roc'))
     
-    draw_prcurve(os.path.join(os.getcwd(), 'results/pr_df.csv'),  
-             os.path.join(os.getcwd(), 'prg'))
+    # draw_prcurve(os.path.join(os.getcwd(), 'results/pr_df.csv'),  
+    #          os.path.join(os.getcwd(), 'prg'))
         
     # plot mapping performance
-    result_pth = os.path.join(os.path.join(os.getcwd(),'results'), 'record res')
+    # result_pth = os.path.join(os.path.join(os.getcwd(),'results'), 'record res')
     
     #bert_pth = os.path.join(result_pth, 'BERT_res.xls')
     #bert_df, bert_df_detail = process_xls_sheets(bert_pth, 'BERT') #bert_sp_df, bert_nosp_df, bert_sp_detail_df, bert_nosp_detail_df
